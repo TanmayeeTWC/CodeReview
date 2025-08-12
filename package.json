@@ -1,0 +1,26 @@
+{
+  "name": "playwright-playground",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "show-report": "npx playwright show-report",
+    "auth": "npx playwright test tests/occ-plugging/auth/occ.pm.auth.spec.js --project=chromium --headed",
+    "test": "npx playwright test tests/occ-plugging/ui --project=chromium",
+    "test-headed": "npx playwright test tests/occ-plugging/ui --project=chromium --headed",
+    "test-vrt": "npx playwright test tests/occ-plugging/vrt",
+    "test-all": "npx playwright test tests/occ-plugging/vrt tests/occ-plugging/ui",
+    "test-all-chromium": "npx playwright test tests/occ-plugging/vrt tests/occ-plugging/ui --project=chromium",
+    "update-vrt": "npx playwright test tests/occ-plugging/vrt --update-snapshots"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "devDependencies": {
+    "@playwright/test": "^1.50.0",
+    "@types/node": "^22.0.2",
+    "chai": "^4.5.0",
+    "dotenv": "^16.4.5",
+    "testchamber": "^2.0.4"
+  }
+}
