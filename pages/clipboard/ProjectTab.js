@@ -1,6 +1,6 @@
-import { expect } from '@playwright/test';
-import path from 'path';
-import { testchamber } from '../../helpers/clipboard/addressGeneratorHelper.js';
+const { expect } = require('@playwright/test');
+const path = require('path');
+const testchamber = require('../../helpers/clipboard/addressGeneratorHelper.js');
 
 export class ProjectTab {
   /**
@@ -66,150 +66,173 @@ export class ProjectTab {
   }
 
   async createProject(projectName, jobNumber, customerName) {
-    await this.page.waitForTimeout(3000)
-    await this.createProjectBtn.click();
-    await this.projectName.fill(projectName);
-    await this.jobNumber.fill(jobNumber);
-    await this.status.selectOption('Active');
-    await this.customer.selectOption({ label: customerName });
-    await this.createProjectButton.click();
-    await expect(this.page.getByText(projectName)).toBeVisible();
-  }
-
-  async searchProject(name) {
-
-    await this.searchBox.fill(name);
-    await this.page.getByText(name).click();
-    await expect(this.page.getByRole('heading', { name: name })).toBeVisible();
-  }
-
-  async addProjectDetails(name, phone, email) {
-
-    await this.searchProject(name);
-    //await this.page.getByText(name).click();
-    let value = await this.addressLine.textContent()
-    console.log('Adress: ', value)//await this.addressLine1Inp.inputValue();  //can also check if state, zipcode is empty but just checking addressline 1 since we won't put partial address
-    if (value === 'address') {
-      await this.addressLine.click()
-      await this.fillAddressDetails()
-    }
-    else
-      console.log("Address already exists for this customer");
-
-    let val = await this.contactNameInp.textContent()
-    console.log("Contact Name: ", val);
-    console.log("Contact Name: ", val.trim().length);
-
-    if (!val || val.trim() === '') {
-      await this.contactNameInp.fill(name);
-      await this.contactPos.selectOption('0'); // Select the first option in the position dropdown
-      await this.contactPhoneInp.fill(phone);
-      await this.contactEmailInp.fill(email);
-      await this.contactOKBtn.click();
-    }
-    else
-      console.log("Contact already exists for this customer")
-  }
-
-  async fillAddressDetails() {
-    const { addressLine1, city, state, zipCode } = testchamber();
-    await this.addressLineInp.fill(addressLine1);
-    await this.cityInp.fill(city);
-    await this.stateInp.fill(state);
-    await this.zipCodeInp.fill(zipCode);
-    await this.okayBtn.click();
-    await this.page.waitForTimeout(3000); // Wait for the address to be saved
-  }
-
-  async assignAndInputForm(projecName, formName, ans1, ans2) {
-    await this.searchProject(projecName);
-    //  await this.page.getByText(projecName).click();
-    await this.formBtn.click();
-    await expect(this.selectCG).toBeVisible();
-    await this.selectCG.click();
-    await this.selectCG.selectOption({ label: formName });
-    await this.addCGBtn.click();
-    await this.addChildBtn.click();
-    await this.addEquipment.click();
-    await this.editForm.click();
-    await this.quesInp.nth(0).fill(ans1);
-    await this.quesInp.nth(1).fill(ans2);
-    const val = this.quesInp.nth(2).innerText()
-    console.log("Question: ", val);
+    await test.step('Create a new project', async () => {
+      await this.page.waitForTimeout(3000);
+      await this.createProjectBtn.click();
+      await this.projectName.fill(projectName);
+      await this.jobNumber.fill(jobNumber);
+      await this.status.selectOption('Active');
+      await this.customer.selectOption({ label: customerName });
+      await this.createProjectButton.click();
+      await expect(this.page.getByText(projectName)).toBeVisible();
+    });
   }
 
   async searchProject(projectName) {
-    await this.searchBox.fill(projectName);
-    await expect(this.page.getByText(projectName)).toBeVisible();
-    await this.page.getByText(projectName).click();
+    await test.step(`Search and open project: ${projectName}`, async () => {
+      await this.searchBox.fill(projectName);
+      await expect(this.page.getByText(projectName)).toBeVisible();
+      await this.page.getByText(projectName).click();
+    });
+  }
+
+  async addProjectDetails(name, phone, email) {
+    await test.step('Add address and contact details to project', async () => {
+      await this.searchProject(name);
+      const value = await this.addressLine.textContent();
+      if (value === 'address') {
+        await this.addressLine.click();
+        await this.fillAddressDetails();
+      } else {
+        console.log("Address already exists for this customer");
+      }
+
+      const val = await this.contactNameInp.textContent();
+      if (!val || val.trim() === '') {
+        await this.contactNameInp.fill(name);
+        await this.contactPos.selectOption('0');
+        await this.contactPhoneInp.fill(phone);
+        await this.contactEmailInp.fill(email);
+        await this.contactOKBtn.click();
+      } else {
+        console.log("Contact already exists for this customer");
+      }
+    });
+  }
+
+  async fillAddressDetails() {
+    await test.step('Fill address form', async () => {
+      const { addressLine1, city, state, zipCode } = testchamber();
+      await this.addressLineInp.fill(addressLine1);
+      await this.cityInp.fill(city);
+      await this.stateInp.fill(state);
+      await this.zipCodeInp.fill(zipCode);
+      await this.okayBtn.click();
+    });
+  }
+
+  async assignAndInputForm(projecName, formName, ans1, ans2) {
+    await test.step('Assign form and input answers', async () => {
+      await this.searchProject(projecName);
+      await this.formBtn.click();
+      await expect(this.selectCG).toBeVisible();
+      await this.selectCG.click();
+      await this.selectCG.selectOption({ label: formName });
+      await this.addCGBtn.click();
+      await this.addChildBtn.click();
+      await this.addEquipment.click();
+      await this.editForm.click();
+      await this.quesInp.nth(0).fill(ans1);
+      await this.quesInp.nth(1).fill(ans2);
+      const val = await this.quesInp.nth(2).innerText();
+      console.log("Question: ", val);
+    });
   }
 
   async reportDeficiencyWithImg(projectName, deficiencyDesc) {
-    await this.searchProject(projectName)
-    await this.formBtn.click();
-    await this.expandBtn.click();
-    await this.editForm.click();
-    await expect(this.magnifyBtn.nth(1)).toBeVisible();
-    await this.magnifyBtn.nth(1).click();
-    await this.deficiencyTab.click();
-    await this.defType.selectOption('1');
-    await this.defStatus.selectOption('1');
-    await this.defAssignedTo.selectOption('1');
-    await this.defDesc.fill(deficiencyDesc);
-    await this.saveDefBtn.click();
-    await expect(this.page.getByText('Deficiency Saved.')).toBeVisible();
-    const uploadsFolder = path.resolve(__dirname, '../../uploads');
-    const fileName = 'world map.png';
-    const filePath = path.join(uploadsFolder, fileName);
-    await this.page.setInputFiles("//input[@ng-disabled='deficiencyImageWorking'][@type='file']", filePath);
-    await this.uploadDefImgBtn.click();
-    await this.closeDefBtn.click();
-    await this.magnifyBtn.nth(1).click();
-    await expect(this.page.getByRole('img')).toBeVisible();
-    await this.defCloseBtn.click();
+    await test.step('Report deficiency with image', async () => {
+      await this.searchProject(projectName);
+      await this.formBtn.click();
+      await this.expandBtn.click();
+      await this.editForm.click();
+      await expect(this.magnifyBtn.nth(1)).toBeVisible();
+      await this.magnifyBtn.nth(1).click();
 
+      await this.addDeficiency(deficiencyDesc);
+      await this.uploadDefImg();
+
+      await this.magnifyBtn.nth(1).click();
+      await expect(this.page.getByRole('img')).toBeVisible();
+      await this.defCloseBtn.click();
+    });
+  }
+
+  async addDeficiency(deficiencyDesc) {
+    await test.step('Fill deficiency details', async () => {
+      await this.deficiencyTab.click();
+      await this.defType.selectOption('1');
+      await this.defStatus.selectOption('1');
+      await this.defAssignedTo.selectOption('1');
+      await this.defDesc.fill(deficiencyDesc);
+      await this.saveDefBtn.click();
+      await expect(this.page.getByText('Deficiency Saved.')).toBeVisible();
+    });
+  }
+  async uploadDefImg() {
+    await test.step('Upload deficiency image', async () => {
+      const uploadsFolder = path.resolve(__dirname, '../../uploads');
+      const fileName = 'world map.png';
+      const filePath = path.join(uploadsFolder, fileName);
+      await this.page.setInputFiles("//input[@ng-disabled='deficiencyImageWorking'][@type='file']", filePath);
+      await this.uploadDefImgBtn.click();
+      await this.closeDefBtn.click();
+    });
   }
 
   async uploadAttachment(projectName) {
+    await test.step(`Upload attachment to project: ${projectName}`, async () => {
+      
+      await this.searchProject(projectName);
+      const uploadsFolder = path.resolve(__dirname, '../../uploads');
+      const fileName = 'PDF_TestPage.pdf';
+      const filePath = path.join(uploadsFolder, fileName);
 
-    await this.searchProject(projectName);
-    const uploadsFolder = path.resolve(__dirname, '../../uploads');
-    const fileName = 'PDF_TestPage.pdf';
-    const filePath = path.join(uploadsFolder, fileName);
-    await this.attachmentsBTN.click();
-    await this.page.setInputFiles("//input[@type='file']", filePath)
-    await expect(this.fileNameInp).toBeVisible();
-    await this.fileNameInp.fill('Automation Attachment');
-    await this.uploadAttachmentBtn.click();
-    await this.saveAttachmentBtn.click();
-    await expect(this.savedMsg).toHaveText('Your changes have been saved.');
+      await this.attachmentsBTN.click();
+      await this.page.setInputFiles("//input[@type='file']", filePath);
+
+      await expect(this.fileNameInp).toBeVisible();
+      await this.fileNameInp.fill('Automation Attachment');
+
+      await this.uploadAttachmentBtn.click();
+      await this.saveAttachmentBtn.click();
+
+      await expect(this.savedMsg).toHaveText('Your changes have been saved.');
+  });
+
   }
 
   async downloadProjectReport(projectName, reporttype) {
-    await this.searchProject(projectName)
-    await this.reportTab.click();
-    await this.page.getByRole('button', { name: 'Download Report' }).click();
+    await test.step(`Download default report for project: ${projectName}`, async () => {
+     await this.searchProject(projectName);
+     await this.reportTab.click();
+     await this.page.getByRole('button', { name: 'Download Report' }).click();
+  });
+
   }
 
   async downloadReport(name, reportType) {
-    await this.searchProject(name);
-    await this.reportTab.click();
-    if (reportType === 'All Equipment') {
-      await this.allEquipLink.click();
-    }
-    else if (reportType === 'Deficiencies') {
-      await this.defLink.click();
-    } else {
-      throw new Error('Invalid report type');
-    }
-    await this.reportTitle.click()
-    await this.reportTitle.fill("Automation report ");
-    await this.downloadReportBtn.click();
-    await expect(this.page.getByText("Report generation started...")).toBeVisible();
-    //await expect(this.downloadReportBtn).toBeEnabled();
-    await expect(this.page.getByText("Your report has been generated and can now be viewed from the report archive")).toBeVisible({ timeout: 20000 });
-    await this.reportTab.click();
-    await expect(this.page.getByText("Automation-report")).toBeVisible();
+    await test.step(`Download ${reportType} report for project: ${name}`, async () => {
+      await this.searchProject(name);
+      await this.reportTab.click();
 
+      if (reportType === 'All Equipment') {
+        await this.allEquipLink.click();
+      } else if (reportType === 'Deficiencies') {
+        await this.defLink.click();
+      } else {
+        throw new Error('Invalid report type');
+      }
+
+      await this.reportTitle.click();
+      await this.reportTitle.fill("Automation report ");
+      await this.downloadReportBtn.click();
+
+      await expect(this.page.getByText("Report generation started...")).toBeVisible();
+      await expect(this.page.getByText("Your report has been generated and can now be viewed from the report archive")).toBeVisible({ timeout: 20000 });
+
+      await this.reportTab.click();
+      await expect(this.page.getByText("Automation-report")).toBeVisible();
+  });
   }
 }
+

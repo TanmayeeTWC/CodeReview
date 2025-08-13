@@ -1,6 +1,5 @@
-import { expect } from '@playwright/test';
-import { testchamber } from '../../helpers/clipboard/addressGeneratorHelper.js';
-import { time } from 'console';
+const { expect } = require('@playwright/test');
+const { testchamber } = require('../../helpers/clipboard/addressGeneratorHelper.js'); 
 
 export class CustomerTab {
   /**

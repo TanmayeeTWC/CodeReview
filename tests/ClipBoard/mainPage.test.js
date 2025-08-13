@@ -1,9 +1,9 @@
 const { test, expect } = require('@playwright/test');
-import { loginHelper } from '../../helpers/clipboard/loginHelper.js';
-import { CustomerTab } from '../../pages/clipboard/CustomerTab.js';
-import { TeamMember } from '../../pages/clipboard/TeamMember.js';
-import { FormTemplates } from '../../pages/clipboard/FormTemplates.js';
-import { testchamber } from '../../helpers/clipboard/addressGeneratorHelper.js';
+const { loginHelper } = require('../../helpers/clipboard/loginHelper.js');
+const { CustomerTab } = require('../../pages/clipboard/CustomerTab.js');    
+const { TeamMember } = require('../../pages/clipboard/TeamMember.js');
+const { FormTemplates } = require('../../pages/clipboard/FormTemplates.js');
+const { testchamber } = require('../../helpers/clipboard/addressGeneratorHelper.js');
 
 test.describe('Login and test', () => {
   test.describe.configure({ mode: 'serial' });
